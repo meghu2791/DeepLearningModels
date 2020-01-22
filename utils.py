@@ -75,14 +75,7 @@ def read_docs(srcfile, m):
                     break
                 ind += 1
                 data.append(line)
-            if end == 0 and start == 1000:
-                data = data[:40]
-            if start > end:
-                if end > 40:
-                    start = end - 40 
-                else:
-                    start = 0
-            print(start,  end, srcfile)
+            #print(start,  end, srcfile)
             for ind, line in enumerate(data):
                 temp = ''
                 if start < ind:
@@ -108,10 +101,7 @@ def read_docs(srcfile, m):
                     end = ind
                     break
                 data.append(line)
-            if end == 0 and start == 1000:
-                data = data[:40]
-
-            print(start,  end, srcfile)
+            
             for ind, line in enumerate(data):
                 temp = ''
                 if start < ind:
@@ -126,10 +116,8 @@ def read_docs(srcfile, m):
                     src += ' '
 
     f.close()
-    if m == 'bert' or m == 'scibert':
-        return src
-    else:
-        return src.split()
+    
+    return src.split()
                 
 def build_vocab(src):
     vocab = dict()
