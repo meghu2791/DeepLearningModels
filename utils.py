@@ -271,33 +271,6 @@ def get_embeddingWeights(model, n_words, word2idx, embedding_dim=300):
             embeddings[index] = np.random.normal(scale=0.6, size=(embedding_dim, ))
     return torch.from_numpy(embeddings).float()
 
-def read_truthValue(path):
-    df = pd.read_csv(os.path.join(path, "bids_file"), sep=' ', header=None)
-    df.columns = ['paper_id', 'reviewer', 'preference']
-    return df
-
-def build_reviewerAndsubmitter_embeddings(doc_name, embedding, df_filtered):
-    reviewer = dict()
-    submitter = dict()
-    reviewer_paper = dict()
-    for i in range(len(doc_name)):
-        if "archive_papers" in doc_name[i]:
-            author = doc_name[i].split('/')[-2]
-            if author in df_filtered['reviewer'].values:
-                if author in reviewer:
-                    reviewer[author].append(embedding[i])
-                    reviewer_paper[author].append(torch.unsqueeze(torch.Tensor(embedding[i]), 0))
-                else:
-                    reviewer[author] = []
-                    reviewer_paper[author] = []
-                    reviewer[author].append(embedding[i])
-                    reviewer_paper[author].append(torch.unsqueeze(torch.Tensor(embedding[i]), 0))
-        else:
-            paper = doc_name[i].split('/')[-1]
-            paper_id = re.sub('\D', '', paper)
-            submitter[paper_id] = torch.unsqueeze(torch.Tensor(embedding[i]), 0)
-    return reviewer, submitter, reviewer_paper
-
 def vectorExtrema(reviewer):
     for each in reviewer.keys():
         var = []
