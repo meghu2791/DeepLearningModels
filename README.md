@@ -1,4 +1,4 @@
-# DeepLearningModels
+# DeepLearning Models
 
 Model architectures for document representations with AutoEncoder, SeqtoSeqLSTMs with Attention, Bert and Scibert.
 Under experimentation: Hierarchical attention Networks (https://arxiv.org/pdf/1602.06023.pdf)
