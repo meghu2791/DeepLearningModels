@@ -8,10 +8,10 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import argparse
 #from xml_parser import ParseXML - Use this only if you need to parse pdfs
-from code.utils import read_data, get_batch, find_max_length, load_Wikiword2vecModel, get_embeddingWeights, build_reviewerAndsubmitter_embeddings, vectorExtrema, vectorMean, read_truthValue
-from code.utils import read_docs
-from code.model import LSTMWithAttentionAutoEncoder, SentenceRNN, LSTMWithAttentionAutoEncoderPretrained, BertModel_pretrained, decode
-from code.eval import Match_Classify, Match_LR, prepare_data, prepare_data_LR, train_LR, eval_LR, train_classification, eval_classification, seq_cosineSimilarity, seq_cosineSimilarity_paper
+from utils import read_data, get_batch, find_max_length, load_Wikiword2vecModel, get_embeddingWeights, vectorExtrema, vectorMean, read_truthValue
+from utils import read_docs
+from model import LSTMWithAttentionAutoEncoder, SentenceRNN, LSTMWithAttentionAutoEncoderPretrained, BertModel_pretrained, decode
+from eval import Match_Classify, Match_LR, prepare_data, prepare_data_LR, train_LR, eval_LR, train_classification, eval_classification, seq_cosineSimilarity, seq_cosineSimilarity_paper
 import numpy as np
 import os
 from sklearn.metrics.pairwise import cosine_similarity
@@ -56,10 +56,6 @@ vector = args.vector
 
 optimizer = "adam"
 pad_token_src = 3
-#if (model_name is not 'bert') and (model_name is not 'scibert'):
-#    token_len = 256
-#else:
-#    token_len = 512
 
 docVector = []
 doc_names = []
@@ -149,7 +145,6 @@ else:
 
 optimizer = optim.Adam(filter(lambda p: p.requires_grad,model.parameters()), lr=lr)
 
-#Parallelization - Noticed drop in test loss upon DataParallel Wrapper. Investigation needed!
 if torch.cuda.device_count() > 0 and (model_name not in 'scibert' and model_name not in 'bert'):
     print("Use", torch.cuda.device_count(), "GPUs")
     model = nn.DataParallel(model)
@@ -202,10 +197,6 @@ elif tr_tt == 'test':
             if t is not None:
                 doc_name.append(doc_names[i])
                 sentence_embedding.append(t.cpu())
-        print("Reviewer count:", len(set(df_filtered['reviewer'])))
-        reviewer_trg, submitter_trg, reviewer_paper_trg  = build_reviewerAndsubmitter_embeddings(doc_name, sentence_embedding, df_filtered)
-        for i in submitter_trg:
-            submitter_trg[i] = submitter_trg[i][0]
     else:    
         model.load_state_dict(torch.load(os.path.join(save_dir, 'autoEncoder_preTrained300.model'))) 
         print(model)
@@ -248,11 +239,6 @@ elif tr_tt == 'test':
         ##Document based cosine similarity##
         doc_name = doc_names
 
-        print("Reviewer count:", len(set(df_filtered['reviewer'])))
-        reviewer_hid, submitter_hid, reviewer_paper_hid = build_reviewerAndsubmitter_embeddings(doc_name, hid, df_filtered)
-        reviewer_trg, submitter_trg, reviewer_paper_trg  = build_reviewerAndsubmitter_embeddings(doc_name, docVector, df_filtered)
-        del hid, docVector
-
     print("Inference complete! Next phase: Evaluation")
     #Evaluation - Clustering paper based
     if eval_method == 'all' or eval_method == 'cluster':
@@ -275,7 +261,6 @@ elif tr_tt == 'test':
                     trg_out.write(str(each)+" "+str(i)+" "+ str(np.mean(affinity_hid_paper[each][i]))+"\n")
         trg_out.close()
         
-    #Vector extrema for building individual reviewer vectors
     if vector == 'extrema':
         reviewer_trg = vectorExtrema(reviewer_trg)
         if "AutoEncoder" in model_name:
